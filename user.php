@@ -4,10 +4,11 @@ include("check_auth.php");
 include("./settings/connect_datebase.php");
 
 $user_query = $mysqli->query("SELECT * FROM `users` WHERE `id` = " . $_SESSION['user']);
-if (!$user_query || !$user_query->num_rows) {
-    session_destroy();
-    header("Location: login.php");
-    exit;
+if ($user['session_token'] !== $token) {
+	session_unset();
+	session_destroy();
+	header("Location: login.php");
+	exit;
 }
 $user_data = $user_query->fetch_assoc();
 ?>
