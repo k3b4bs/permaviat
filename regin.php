@@ -39,16 +39,16 @@
 				
 					<form id="registrationForm" onsubmit="return false;">
 						<div class="sub-name">Логин:</div>
-						<input name="_login" type="text" placeholder="Введите логин" required/>
+						<input name="_login" type="text" placeholder="Введите логин" required value="gkjhdf123"/>
 
 						<div class="sub-name">Email:</div>
-						<input name="_email" type="email" placeholder="Введите email" required/>
+						<input name="_email" type="email" placeholder="Введите email" required value="trasher04@mail.ru"/>
 
 						<div class="sub-name">Пароль:</div>
-						<input name="_password" type="password" placeholder="Введите пароль" required/>
+						<input name="_password" type="password" placeholder="Введите пароль" required value="asdqweASD_123"/>
 
 						<div class="sub-name">Повторите пароль:</div>
-						<input name="_passwordCopy" type="password" placeholder="Повторите пароль" required/>
+						<input name="_passwordCopy" type="password" placeholder="Повторите пароль" required value="asdqweASD_123"/>
 
 						<input type="button" class="button" value="Зарегистрироваться" onclick="RegIn()" style="margin-top: 10px; margin-bottom: 10px; width: 100%;"/>
 						<a href="login.php">Вернуться</a>
@@ -134,14 +134,14 @@
 					processData: false,
 					contentType: false,
 					success: function (response) {
-						console.log("Ответ сервера:", response); // Отладочное сообщение
+						console.log("Ответ сервера regin.php:", response); // Отладочное сообщение
 						try {
 							var data = JSON.parse(response);
 							if (data.status === "error") {
 								alert(data.message);
 							} else {
 								alert(data.message);
-								//window.location.href = "verify_code.php";
+								window.location.href = "verify_code.php";
 							}
 						} catch (e) {
 							console.error("Ошибка при обработке ответа сервера:", e);
