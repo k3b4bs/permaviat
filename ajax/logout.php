@@ -2,27 +2,14 @@
 	session_start();
 	require_once("../settings/connect_datebase.php");
 
-	$IdUser = $_SESSION["user"];
-	$IdSession = $_SESSION["IdSession"];
-
-	$Sql = "SELECT `session`.*, `users`.`login` ".
-			"FROM `session` `session` ".
-			"JOIN `users` `users` ON `users`.`id` = `session`.`IdUser` ".
-			"WHERE `session`.`Id` = {$IdSession}";
-
-	$Query = $mysqli->query($Sql);
-	$Read = $Query->fetch_array();
-
-	$TimeStart = strtotime($Read["DateStart"]);
-	$TimeNow = time();
-	$Ip = $Read["Ip"];
-	$TimeDelta = gmdate("H:i:s", ($TimeNow - $TimeStart));
-	$Date = date("Y-m-d H:i:s");
-	$login = $Read["login"];
-
-	$Sql = "INSERT INTO ".
-		"`logs` (`Ip`, `IdUser`, `Date`, `TimeOnline`, `Event`) ".
-		"VALUES ('{$Ip}', {$IdUser}, '{$Date}', '{$TimeDelta}', 'Пользователь {$login} покинул этот сайт.')";
-	$mysqli->query($Sql);
-
-	session_destroy();
+	if (isset($_SESSION['user'])) {
+		$user_id = $_SESSION['user'];
+	
+		$mysqli->query("UPDATE `users` SET `session_token` = NULL WHERE `id` = " . $user_id);
+	
+		session_destroy();
+	
+		echo json_encode(["status" => "success", "message" => "Вы успешно вышли из системы."]);
+	} else {
+		echo json_encode(["status" => "error", "message" => "Вы уже вышли из системы."]);
+	}

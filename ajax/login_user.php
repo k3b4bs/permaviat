@@ -1,39 +1,33 @@
 <?php
-	session_start();
-	include("../settings/connect_datebase.php");
-	
-	$login = $_POST['login'];
-    $password = $_POST['password'];
-	
-	// ищем пользователя
-	$query_user = $mysqli->query("SELECT * FROM `users` WHERE `login` = '" . $login . "';");
-	
-	$id = -1;
-	while($user_read = $query_user->fetch_row()) {
-		if(password_verify($password, $user_read[3])){
-			$id = $user_read[0];
-		}
-	}
-	
-	if($id != -1) {
-		$_SESSION['user'] = $id;
-		
-		$Ip = $_SERVER["REMOTE_ADDR"];
-		$DateStart = date("Y-m-d H:i:s");
+session_start();
+include("../settings/connect_datebase.php");
 
-		$Sql = "INSERT INTO session (IdUser, Ip, DateStart, DateNow) VALUES ({$id}, '{$Ip}', '{$DateStart}', '{$DateStart}')";
-		$mysqli->query($Sql);
+$login = trim($_POST['login']);
+$password = trim($_POST['password']);
 
-		$Sql = "SELECT Id FROM session WHERE DateStart = '{$DateStart}';";
-		$Query = $mysqli->query($Sql);
-		$Read = $Query->fetch_assoc();
-		$_SESSION["IdSession"] = $Read["Id"];
+$query_user = $mysqli->query("SELECT * FROM `users` WHERE `login` = '" . $mysqli->real_escape_string($login) . "'");
+if ($user = $query_user->fetch_assoc()) {
+    if (password_verify($password, $user['password'])) {
+        // Генерация нового токена сессии
+        $token = bin2hex(random_bytes(32));
 
-		
-		$Sql = "INSERT INTO ".
-		"logs (Ip, IdUser, Date, TimeOnline, Event) ".
-		"VALUES ('{$Ip}',{$id},'{$DateStart}','00:00:00','Пользователь {$login} авторизовался.')";
-		$mysqli->query($Sql);
-	}
-	echo md5(md5($id));
+        // Обновление токена в базе данных
+        $update_query = $mysqli->query("UPDATE `users` SET `session_token` = '" . $mysqli->real_escape_string($token) . "' WHERE `id` = " . $user['id']);
+        if (!$update_query) {
+            echo json_encode(["status" => "error", "message" => "Ошибка при обновлении токена."]);
+            exit;
+        }
+
+        // Установка данных сессии
+        $_SESSION['user'] = $user['id'];
+        $_SESSION['token'] = $token;
+
+        // Успешная авторизация
+        echo json_encode(["status" => "success", "message" => "Авторизация успешна."]);
+    } else {
+        echo json_encode(["status" => "error", "message" => "Неверный логин или пароль."]);
+    }
+} else {
+    echo json_encode(["status" => "error", "message" => "Пользователь не найден."]);
+}
 ?>
