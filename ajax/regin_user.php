@@ -1,41 +1,58 @@
 <?php
 	session_start();
 	include("../settings/connect_datebase.php");
-	
-	$login = $_POST['login'];
-	$password = $_POST['password'];
-	
-	// ищем пользователя
-	$query_user = $mysqli->query("SELECT * FROM `users` WHERE `login`='".$login."'");
-	$id = -1;
-	
-	if($user_read = $query_user->fetch_row()) {
-		echo $id;
-	} else {
-		$mysqli->query("INSERT INTO `users`(`login`, `password`, `roll`) VALUES ('".$login."', '".$password."', 0)");
-		
-		$query_user = $mysqli->query("SELECT * FROM `users` WHERE `login`='".$login."' AND `password`= '".$password."';");
-		$user_new = $query_user->fetch_row();
-		$id = $user_new[0];
-			
-		if($id != -1) $_SESSION['user'] = $id; // запоминаем пользователя
-		echo $id;
 
-		$Ip = $_SERVER["REMOTE_ADDR"];
-		$DateStart = date("Y-m-d H:i:s");
+	$login = trim($_POST['login']);
+	$email = trim($_POST['email']);
+	$password = trim($_POST['password']);
 
-		$Sql = "INSERT INTO session (IdUser, Ip, DateStart, DateNow) VALUES ({$id}, '{$Ip}', '{$DateStart}', '{$DateStart}')";
-		$mysqli->query($Sql);
-
-		$Sql = "SELECT Id FROM session WHERE DateStart = '{$DateStart}';";
-		$Query = $mysqli->query($Sql);
-		$Read = $Query->fetch_assoc();
-		$_SESSION["IdSession"] = $Read["Id"];
-
-		
-		$Sql = "INSERT INTO ".
-		"logs (Ip, IdUser, Date, TimeOnline, Event) ".
-		"VALUES ('{$Ip}',{$id},'{$DateStart}','00:00:00','Пользователь {$login} зарегистрировался.')";
-		$mysqli->query($Sql);
+	if (empty($login) || empty($email) || empty($password)) {
+		echo json_encode(["status" => "error", "message" => "Все поля обязательны для заполнения."]);
+		exit;
 	}
+
+	function validatePassword($password) {
+		$errors = [];
+		if (strlen($password) <= 8) {
+			$errors[] = "Пароль должен содержать более 8 символов.";
+		}
+		if (!preg_match('/[a-zA-Z]/', $password)) {
+			$errors[] = "Пароль должен содержать латинские буквы.";
+		}
+		if (!preg_match('/\d/', $password)) {
+			$errors[] = "Пароль должен содержать хотя бы одну цифру.";
+		}
+		if (!preg_match('/[!@#$%^&*(),-_.?":{}|<>]/', $password)) {
+			$errors[] = "Пароль должен содержать хотя бы один специальный символ.";
+		}
+		if (!preg_match('/[A-Z]/', $password)) {
+			$errors[] = "Пароль должен содержать хотя бы одну заглавную букву.";
+		}
+		return $errors;
+	}
+
+	$errors = validatePassword($password);
+	if (!empty($errors)) {
+		echo json_encode(["status" => "error", "message" => implode(" ", $errors)]);
+		exit;
+	}
+
+	$query_user = $mysqli->query("SELECT * FROM `users` WHERE `login` = '" . $mysqli->real_escape_string($login) . "' OR `email` = '" . $mysqli->real_escape_string($email) . "'");
+	if ($query_user->num_rows > 0) {
+		echo json_encode(["status" => "error", "message" => "Пользователь с таким логином или email уже существует."]);
+		exit;
+	}
+
+	$hashed_password = password_hash($password, PASSWORD_DEFAULT);
+	$code = str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
+
+	$insert_query = $mysqli->query("INSERT INTO `users` (`login`, `email`, `password`, `roll`) VALUES ('" . $mysqli->real_escape_string($login) . "', '" . $mysqli->real_escape_string($email) . "', '" . $mysqli->real_escape_string($hashed_password) . "', 0)");
+	if (!$insert_query) {
+		echo json_encode(["status" => "error", "message" => "Ошибка при регистрации."]);
+		exit;
+	}
+
+	$new_user_id = $mysqli->insert_id;
+
+	
 ?>
