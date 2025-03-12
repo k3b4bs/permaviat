@@ -53,7 +53,7 @@
 					<a href="regin.php">Регистрация</a>
 					<br><a href="recovery.php">Забыли пароль?</a>
 					<input type="button" class="button" value="Войти" onclick="LogIn()"/>
-					<center><div class="g-recaptcha" data-sitekey="6LeYBfIqAAAAAAyUdcf0YYtXQfkRqZnOZH51i-G1"></div></center>
+					<center><div class="g-recaptcha" data-sitekey="6LcEDfIqAAAAAIYJ5nMFgmhOVDbZ40hFpvn4wTSJ"></div></center>
 					<img src = "img/loading.gif" class="loading"/>
 				</div>
 				
@@ -66,14 +66,14 @@
 		</div>
 		
 		<script>
-			var captcha = grecaptcha.getResponse();
-			if(captcha.length){
-				let Data = new FormData();
-				Data.append('g-recaptcha-response', captcha);
-
-				Ajax("url", Data, SignIn);
-			}
+			
 			function LogIn() {
+				var captcha = grecaptcha.getResponse(); // Получаем ответ reCAPTCHA
+				if (!captcha) {
+					alert("Пройдите проверку reCAPTCHA.");
+					return;
+				}
+
 				var loading = document.getElementsByClassName("loading")[0];
 				var button = document.getElementsByClassName("button")[0];
 
@@ -91,6 +91,7 @@
 				var data = new FormData();
 				data.append("login", _login);
 				data.append("password", _password);
+				data.append("g-recaptcha-response", captcha); // Добавляем ответ reCAPTCHA
 
 				$.ajax({
 					url: 'ajax/login_user.php',
@@ -103,10 +104,10 @@
 					success: function (response) {
 						if (response.status === "success") {
 							alert(response.message);
-							location.reload(); 
+							location.reload();
 						} else if (response.status === "expired") {
 							alert(response.message);
-							window.location.href = response.redirect; 
+							window.location.href = response.redirect;
 						} else {
 							alert(response.message);
 						}
