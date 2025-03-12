@@ -8,7 +8,7 @@
 <html>
 	<head> 
 		<meta charset="utf-8">
-		<title> WEB-безопасность </title>
+		<title> WEB-безопасность </title> 
 		
 		<link rel="stylesheet" href="style.css">
 		<script src="https://code.jquery.com/jquery-1.8.3.js"></script>
