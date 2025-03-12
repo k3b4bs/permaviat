@@ -53,7 +53,7 @@
 					<a href="regin.php">Регистрация</a>
 					<br><a href="recovery.php">Забыли пароль?</a>
 					<input type="button" class="button" value="Войти" onclick="LogIn()"/>
-					<center><div class="g-recapthca" data-sitekey="6LeYBfIqAAAAAAyUdcf0YYtXQfkRqZnOZH51i-G1"></div></center>
+					<center><div class="g-recaptcha" data-sitekey="6LeYBfIqAAAAAAyUdcf0YYtXQfkRqZnOZH51i-G1"></div></center>
 					<img src = "img/loading.gif" class="loading"/>
 				</div>
 				
@@ -66,7 +66,13 @@
 		</div>
 		
 		<script>
+			var captcha = grecaptcha.getResponse();
+			if(captcha.length){
+				let Data = new FormData();
+				Data.append('g-recaptcha-response', captcha);
 
+				Ajax("url", Data, SignIn);
+			}
 			function LogIn() {
 				var loading = document.getElementsByClassName("loading")[0];
 				var button = document.getElementsByClassName("button")[0];
