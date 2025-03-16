@@ -29,7 +29,7 @@ include("./settings/connect_datebase.php");
                 <div class="sub-name">Введите код из письма:</div>
                 <input name="_code" type="text" placeholder="Код из письма" required/>
 
-                <input type="button" class="button" value="Подтвердить" onclick="VerifyCode()" style="margin-top: 10px; margin-bottom: 10px; width: 100%;"/>
+                <input type="button" class="button" value="Подтвердить" onclick="VerifyCode()" style="margin-top: 0px;"/>
                 <img src="img/loading.gif" class="loading" style="margin-top: 0px; display: none;"/>
             </form>
         </div>
