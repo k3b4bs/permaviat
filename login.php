@@ -29,6 +29,7 @@ if (isset($_SESSION['user']) && isset($_SESSION['token'])) {
     <meta charset="utf-8">
     <title>Авторизация</title>
     <script src="https://code.jquery.com/jquery-1.8.3.js"></script>
+	<script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -53,6 +54,7 @@ if (isset($_SESSION['user']) && isset($_SESSION['token'])) {
             <a href="regin.php">Регистрация</a>
             <br><a href="recovery.php">Забыли пароль?</a>
             <input type="button" class="button" value="Войти" onclick="LogIn()"/>
+            <center><div class="g-recaptcha" data-sitekey="6LcEDfIqAAAAAIYJ5nMFgmhOVDbZ40hFpvn4wTSJ"></div></center>
             <img src="img/loading.gif" class="loading" style="display: none;"/>
         </div>
         <div class="footer">
@@ -64,6 +66,13 @@ if (isset($_SESSION['user']) && isset($_SESSION['token'])) {
 </div>
 <script>
     function LogIn() {
+    
+        var captcha = grecaptcha.getResponse(); // Получаем ответ reCAPTCHA
+		if (!captcha) {
+			alert("Пройдите проверку reCAPTCHA.");
+			return;
+		}
+        
         var loading = document.getElementsByClassName("loading")[0];
         var button = document.getElementsByClassName("button")[0];
         var _login = document.getElementsByName("_login")[0].value.trim();
@@ -80,6 +89,7 @@ if (isset($_SESSION['user']) && isset($_SESSION['token'])) {
         var data = new FormData();
         data.append("login", _login);
         data.append("password", _password);
+        data.append("g-recaptcha-response", captcha);
 
         $.ajax({
             url: 'ajax/login_user.php',

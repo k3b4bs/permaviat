@@ -1,27 +1,27 @@
 <?php
-session_start();
-require_once("../settings/connect_datebase.php");
-$login = $_POST["login"] ?? '';
-$password = $_POST["password"] ?? '';
+    session_start();
+    require_once("../settings/connect_datebase.php");
+    $login = $_POST["login"] ?? '';
+    $password = $_POST["password"] ?? '';
 
-if (empty($login) || empty($password)) {
-    echo json_encode(["status" => "error", "message" => "Логин и пароль обязательны."]);
-    exit;
-}
-$stmt = $mysqli->prepare("SELECT * FROM `users` WHERE `login` = ?");
-$stmt->bind_param("s", $login);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($user = $result->fetch_assoc()) {
-    if (!password_verify($password, $user['password'])) {
-        echo json_encode(["status" => "error", "message" => "Неверный логин или пароль."]);
+    if (empty($login) || empty($password)) {
+        echo json_encode(["status" => "error", "message" => "Логин и пароль обязательны."]);
         exit;
     }
     $stmt = $mysqli->prepare("SELECT * FROM `users` WHERE `login` = ?");
-$stmt->bind_param("s", $login);
-$stmt->execute();
-$result = $stmt->get_result();
+    $stmt->bind_param("s", $login);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($user = $result->fetch_assoc()) {
+        if (!password_verify($password, $user['password'])) {
+            echo json_encode(["status" => "error", "message" => "Неверный логин или пароль."]);
+            exit;
+        }
+        $stmt = $mysqli->prepare("SELECT * FROM `users` WHERE `login` = ?");
+    $stmt->bind_param("s", $login);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($user = $result->fetch_assoc()) {
         if (!empty($user['verification_code'])) {
